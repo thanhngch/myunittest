@@ -1,5 +1,7 @@
 #!/usr/bin/env php
 <?php
+
+// add autoload 
 foreach (array(
     __DIR__ . '/../../autoload.php', 
     __DIR__ . '/../autoload.php', 
@@ -14,19 +16,69 @@ foreach (array(
 require_once PHPUNIT_COMPOSER_INSTALL;
 require_once "autoload.php";
 
-require_once __DIR__ . "/../test/CalculatorTest.php";
+echo "PHPUnit by nguyen-thanh-mulodo\n\n";
+
+// set default directory
+$default_test_dir = __DIR__ . '/../';
+if ($argc > 1) {
+    $default_test_dir = $argv[$argc - 1];
+}
+// echo $default_test_dir;
+
+
+/**
+ * list all file recursively in $dir
+ * @param $dir: directory 
+ * @return array of files 
+ */
+function getDirContents($dir, &$results = array()){
+    $files = scandir($dir);
+
+    foreach($files as $key => $value){
+        $path = realpath($dir.DIRECTORY_SEPARATOR.$value);
+        if(!is_dir($path)) {
+            $results[] = $path;
+        } else if($value != "." && $value != "..") {
+            getDirContents($path, $results);
+            $results[] = $path;
+        }
+    }
+
+    return $results;
+}
+
+// require test file
+$default_test_dir .= '/test/';
+$list_file = getDirContents($default_test_dir);
+$list_class_name = array();
+
+foreach ($list_file as $file) {
+    if (preg_match('/.*Test.php$/', $file)) {
+        require_once $file;
+    }
+    $file_name = explode('.php', basename($file));
+    $list_class_name[] = $file_name[0];
+}
 
 $start_time = microtime(TRUE);
 
-echo "PHPUnit by nguyen-thanh-mulodo\n\n";
-
-$test = new CalculatorTest;
-$test->setUp();
-$test->testAddNumber();
+foreach ($list_class_name as $class_name) {
+    $reflection_class = new ReflectionClass($class_name);
+    $object = $reflection_class->newInstance();
+    if ($reflection_class->hasMethod('setUp')) {
+        $object->setUp();    
+    }
+    $list_method = $reflection_class->getMethods();
+    foreach ($list_method as $method) {
+        if (preg_match('/test.*/', $method)) {
+            $method->invoke($object);
+        }
+    }
+}
 
 PHPTestResult::printResult();
 
 $end_time = microtime(TRUE);
 
 echo "\nTime: " . round(($end_time - $start_time) * 1000, 3) . " ms, ";
-echo "Memory: " . round(memory_get_usage(TRUE)/1024, 0) . " KB\n";
+echo "Memory: " . round(memory_get_usage()/1024, 0) . " KB\n";

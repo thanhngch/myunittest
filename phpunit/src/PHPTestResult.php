@@ -15,6 +15,10 @@ class PHPTestResult
     public static function printResult()
     {
         $number_test = self::$number_test_pass + self::$number_test_error;
+        if ($number_test == 0) {
+            echo "\e[7;33mNo tests executed!\e[0m\n";
+            return;
+        }
         if (self::$number_test_error == 0) {
             echo "\e[7;32mOK (" . self::$number_test_pass . " tests)\e[0m\n";
         }
