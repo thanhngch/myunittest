@@ -62,7 +62,7 @@ foreach ($list_file as $file) {
 }
 
 // create object from class
-// if method begin name is 'test', invoke it
+// call invoke_method declare in PHPUtilities
 foreach ($list_class_name as $class_name) {
     $reflection_class = new ReflectionClass($class_name);
     $object = $reflection_class->newInstance();

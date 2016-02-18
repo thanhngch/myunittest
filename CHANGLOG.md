@@ -1,3 +1,9 @@
+##version 0.3.0
+- add @dataProvider document comment
+
+##version 0.2.1
+- Fix test function name begin with test
+
 ##version 0.2
 - Show warning if no test case
 - Can set test directory in command line `./myphpunit.phar <directory>`
