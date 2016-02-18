@@ -17,6 +17,7 @@ require_once PHPUNIT_COMPOSER_INSTALL;
 require_once "autoload.php";
 
 echo "PHPUnit by nguyen-thanh-mulodo\n\n";
+$start_time = microtime(TRUE);
 
 // set default directory
 $default_test_dir = __DIR__ . '/../';
@@ -60,22 +61,18 @@ foreach ($list_file as $file) {
     $list_class_name[] = $file_name[0];
 }
 
-$start_time = microtime(TRUE);
-
+// create object from class
+// if method begin name is 'test', invoke it
 foreach ($list_class_name as $class_name) {
     $reflection_class = new ReflectionClass($class_name);
     $object = $reflection_class->newInstance();
     if ($reflection_class->hasMethod('setUp')) {
         $object->setUp();    
     }
-    $list_method = $reflection_class->getMethods();
-    foreach ($list_method as $method) {
-        if (preg_match('/test.*/', $method)) {
-            $method->invoke($object);
-        }
-    }
+    invoke_method($reflection_class, $object);
 }
 
+// print test result
 PHPTestResult::printResult();
 
 $end_time = microtime(TRUE);
